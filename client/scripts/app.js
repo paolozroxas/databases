@@ -3,6 +3,7 @@ var app = {
 
   //TODO: The current 'handleUsernameClick' function just toggles the class 'friend'
   //to all messages sent by the user
+  //server: 'http://parse.CAMPUS.hackreactor.com/chatterbox/classes/messages',
   server: 'http://127.0.0.1:3000/classes/messages',
   username: 'anonymous',
   roomname: 'lobby',
@@ -26,8 +27,8 @@ var app = {
     app.$roomSelect.on('change', app.handleRoomChange);
 
     // Fetch previous messages
-    //app.startSpinner();
-    app.fetch(false);
+    app.startSpinner();
+    app.fetch();
 
     // Poll for new messages
     setInterval(function() {
@@ -36,13 +37,14 @@ var app = {
   },
 
   send: function(message) {
-    //app.startSpinner();
+    app.startSpinner();
 
     // POST the message to the server
     $.ajax({
       url: app.server,
       type: 'POST',
-      data: message,
+      data: JSON.stringify(message),
+      contentType: 'application/json',
       success: function (data) {
         // Clear messages input
         app.$message.val('');
@@ -74,14 +76,14 @@ var app = {
 
         // Only bother updating the DOM if we have a new message
         //if (mostRecentMessage.objectId !== app.lastMessageId) {
-          // Update the UI with the fetched rooms
-          app.renderRoomList(data.results);
+        // Update the UI with the fetched rooms
+        app.renderRoomList(data.results);
+        //console.log('asdasdasdasdasd');
+        // Update the UI with the fetched messages
+        app.renderMessages(data.results, animate);
 
-          // Update the UI with the fetched messages
-          app.renderMessages(data.results, animate);
-
-          // Store the ID of the most recent message
-          app.lastMessageId = mostRecentMessage.objectId;
+        // Store the ID of the most recent message
+        app.lastMessageId = mostRecentMessage.objectId;
         //}
       },
       error: function(error) {
@@ -96,8 +98,9 @@ var app = {
 
   renderMessages: function(messages, animate) {
     // Clear existing messages`
+    //console.log(messages);
     app.clearMessages();
-    //app.stopSpinner();
+    app.stopSpinner();
     if (Array.isArray(messages)) {
       // Add all fetched messages that are in our current room
       messages
@@ -203,7 +206,7 @@ var app = {
         app.$roomSelect.val(roomname);
       }
     } else {
-      //app.startSpinner();
+      app.startSpinner();
       // Store as undefined for empty names
       app.roomname = app.$roomSelect.val();
     }
@@ -224,13 +227,13 @@ var app = {
     event.preventDefault();
   },
 
-  // startSpinner: function() {
-  //   $('.spinner img').show();
-  //   $('form input[type=submit]').attr('disabled', 'true');
-  // },
+  startSpinner: function() {
+    $('.spinner img').show();
+    $('form input[type=submit]').attr('disabled', 'true');
+  },
 
-  // stopSpinner: function() {
-  //   $('.spinner img').fadeOut('fast');
-  //   $('form input[type=submit]').attr('disabled', null);
-  // }
+  stopSpinner: function() {
+    $('.spinner img').fadeOut('fast');
+    $('form input[type=submit]').attr('disabled', null);
+  }
 };

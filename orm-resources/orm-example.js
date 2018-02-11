@@ -42,3 +42,10 @@ User.sync()
     console.error(err);
     db.close();
   });
+Message.sync()
+  .then(function() {
+    return Message.create({userid: 1, text: 'do you hear the people sing', roomname: 'barricade'});
+  })
+  .then(function() {
+    return Message.findAll({where: })
+  })
